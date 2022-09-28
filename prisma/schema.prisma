@@ -10,14 +10,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  cpf      String  @unique
+  name     String
+  password String
+  phone    String?
+
+  employee Employee?
+  customer Customer?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Employee {
   id           Int    @id @default(autoincrement())
-  name         String
   registration String
-  cpf          String
-  phone        String
   group        Int
-  password     String
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -25,12 +39,11 @@ model Employee {
 
 model Customer {
   id            Int     @id @default(autoincrement())
-  name          String
-  cpf           String
-  phone         String
   buysOnCredit  Boolean
   creditPayDate Int
-  password      String
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
