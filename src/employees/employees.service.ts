@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 @Injectable()
 export class EmployeesService {
-  create(createEmployeeDto: CreateEmployeeDto) {
-    return 'This action adds a new employee';
+  constructor(private prismaService: PrismaService) {}
+  async create(createEmployeeDto: CreateEmployeeDto, user: User) {
+    const employee = await this.prismaService.employee.create({
+      data: {
+        ...createEmployeeDto,
+        userId: user.id,
+      },
+    });
+    return employee;
   }
 
-  findAll() {
-    return `This action returns all employees`;
+  async findAll() {
+    const employees = await this.prismaService.employee.findMany({});
+    return employees;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} employee`;
+  async findOne(id: number) {
+    const employee = await this.prismaService.employee.findUnique({
+      where: { id },
+    });
+    return employee;
   }
 
-  update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
-    return `This action updates a #${id} employee`;
+  async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
+    const employee = await this.prismaService.employee.findUnique({
+      where: { id },
+    });
+    if (!employee) {
+      throw new NotFoundException('Employee not found');
+    }
+    const updatedEmployee = await this.prismaService.employee.update({
+      where: { id },
+      data: { ...updateEmployeeDto },
+    });
+    return updatedEmployee;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} employee`;
+  async remove(id: number) {
+    await this.prismaService.employee.delete({ where: { id } });
   }
 }

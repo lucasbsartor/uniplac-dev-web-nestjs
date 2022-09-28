@@ -4,10 +4,16 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { SignUpDto } from './dtos/signUp.dto';
 import { Prisma, User } from '@prisma/client';
 import { SignInDto } from './dtos/signIn.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
   async signUp(signUpDto: SignUpDto) {
     try {
@@ -21,8 +27,6 @@ export class AuthService {
           phone: signUpDto.phone,
         },
       });
-
-      delete user.password;
 
       return this.signJwt(user);
     } catch (error) {
@@ -55,8 +59,13 @@ export class AuthService {
       email: user.email,
     };
 
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn: this.configService.get('JWT_EXPIRES_IN'),
+      secret: this.configService.get('JWT_SECRET'),
+    });
+
     return {
-      access_token: payload,
+      access_token: token,
     };
   }
 }
