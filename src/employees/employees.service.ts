@@ -7,11 +7,18 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 @Injectable()
 export class EmployeesService {
   constructor(private prismaService: PrismaService) {}
-  async create(createEmployeeDto: CreateEmployeeDto, user: User) {
+  async create(createEmployeeDto: CreateEmployeeDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: createEmployeeDto.userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     const employee = await this.prismaService.employee.create({
       data: {
         ...createEmployeeDto,
-        userId: user.id,
       },
     });
     return employee;

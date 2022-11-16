@@ -1,14 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, Max, Min } from 'class-validator';
 
 export class CreateCustomerDto {
   @ApiProperty()
   @IsNotEmpty()
-  @IsBoolean()
-  buysOnCredit: boolean;
+  @IsInt()
+  userId: number;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsBoolean()
+  buysOnCredit = false;
+
+  @ApiProperty()
   @IsInt()
-  creditPayDate: number;
+  @Min(1)
+  @Max(30)
+  creditPayDate = 5;
 }

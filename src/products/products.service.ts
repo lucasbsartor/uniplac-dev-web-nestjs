@@ -14,7 +14,9 @@ export class ProductsService {
   }
 
   async findAll() {
-    const products = await this.prismaService.product.findMany({});
+    const products = await this.prismaService.product.findMany({
+      orderBy: { id: 'asc' },
+    });
     return products;
   }
 
@@ -22,6 +24,9 @@ export class ProductsService {
     const product = await this.prismaService.product.findUnique({
       where: { id },
     });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
     return product;
   }
 
